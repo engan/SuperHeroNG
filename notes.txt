@@ -1,0 +1,113 @@
+ng version
+    Angular CLI: 14.2.6
+    Node: 16.13.0
+    Package Manager: npm 8.1.0
+    OS: win32 x64
+
+ng serve -o
+
+cd .\src\app\services\
+ng g s super-hero --skip-tests
+
+
+// Run Debug
+https://localhost:7178/api/SuperHero
+
+// Find port 7178 get applicationUrl in file Properties/launchSettings.json
+// Open Visual Studio (project SuperHeroAPI) 
+"profiles": {
+"SuperHeroAPI": {
+    "launchUrl": "swagger",
+    "applicationUrl": "https://localhost:7178;http://localhost:5178",
+    }
+},
+
+// Added apiUrl in environment/environment.ts
+export const environment = {
+  apiUrl: "https://localhost:7178/api"
+};
+
+// Added HttpClientModule in services/app.modules.ts
+import { HttpClientModule } from '@angular/common/http';
+imports: [
+  HttpClientModule
+],
+
+// Added url in services/super-hero.services.ts
+import { Observable } from 'rxjs/internal/Observable';
+export class SuperHeroService {
+  private url = "SuperHero";   // SuperHero is the controllername
+  constructor(private http: HttpClient) { }
+  public getSuperHeros() : Observable<SuperHero[]> {
+    return this.http.get<SuperHero[]>(`${environment.apiUrl}/${this.url}`);
+  }
+}
+
+// see ngOnInit() in services/app.components.ts
+export class AppComponent {
+  title = 'SuperHero.UI';
+  heroes: SuperHero[] = [];
+
+  constructor(private superHeroService: SuperHeroService) {}
+
+  ngOnInit() : void {
+    this.superHeroService
+    .getSuperHeros()
+    .subscribe((result: SuperHero[]) => (this.heroes = result));
+  }
+}
+
+// Program.cs in project SuperHeroAPI (Visual Studio)
+// Added to project, Access to XMLHttpRequest 
+builder.Services.AddCors(options => options.AddPolicy(name: "SuperHeroOrigins",
+    policy =>
+    {
+        policy.WithOrigins("http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
+    }));
+app.UseCors("SuperHeroOrigins");    
+
+ // Added in appsettings.json i project SuperHeroAPI (Visual Studio)
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.\\SQLEXPRESS01;Database=superherodb;Trusted_Connection=True;MultipleActiveResultSets=True"
+},   
+
+// Down to folder SuperHeroAPI (from Visual Studio)
+PM> cd superheroapi
+PM> dotnet tool install --global dotnet-ef
+PM> dotnet ef
+
+    Entity Framework Core .NET Command-line Tools 6.0.10
+    Options:
+    --version        Show version information
+    -h|--help        Show help information
+    -v|--verbose     Show verbose output.
+    --no-color       Don't colorize output.
+    --prefix-output  Prefix output with level.
+
+    Commands:
+    database    Commands to manage the database.
+    dbcontext   Commands to manage DbContext types.
+    migrations  Commands to manage migrations.
+
+// Program.cs in project SuperHeroAPI (Visual Studio)
+// Added to project, connection between database and entity framework
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});    
+
+PM> dotnet ef migrations add Initial
+PM> dotnet ef database update
+
+// create new component named edit-hero
+PS D:\Dokumenter\Visual Studio 2022\Projects\SuperHeroNG\SuperHero.UI> cd src\app\components> ng g c edit-hero --skip-tests
+    CREATE src/app/components/edit-hero/edit-hero.component.html (24 bytes)
+    CREATE src/app/components/edit-hero/edit-hero.component.ts (286 bytes)
+    CREATE src/app/components/edit-hero/edit-hero.component.css (0 bytes)
+    UPDATE src/app/app.module.ts (575 bytes)
+
+
+// Removes all files from the repository and adds them back 
+// (this time respecting the rules in .gitignore).
+git rm -rf --cached .
+git add .    
